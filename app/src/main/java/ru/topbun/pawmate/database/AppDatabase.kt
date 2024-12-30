@@ -37,7 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         private fun createDatabase(context: Context) = Room.databaseBuilder(
             context, AppDatabase::class.java, DB_NAME
-        ).build()
+        ).createFromAsset("tips.db").build()
 
     }
 

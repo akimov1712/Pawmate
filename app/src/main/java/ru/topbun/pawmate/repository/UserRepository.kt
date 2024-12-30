@@ -17,7 +17,10 @@ class UserRepository(private val context: Context) {
     suspend fun isUserAuth() = settings.getUserId() != null
 
     suspend fun singUp(user: User): Boolean{
-        val user = dao.addUser(user)
+        val oldUser = dao.userIsExists(user.email)
+        if (oldUser != 0) return false
+        dao.addUser(user)
+        val user = dao.getUser(user.email, user.password) ?: return false
         settings.saveUserId(user.id)
         return settings.getUserId() == user.id
     }

@@ -13,7 +13,7 @@ interface PetDao {
     suspend fun insertPet(pet: Pet)
 
     @Query("SELECT * FROM pets WHERE id = :id LIMIT 1")
-    suspend fun getPet(id: Int): Pet
+    fun getPet(id: Int): Flow<Pet>
 
     @Query("SELECT * FROM pets")
     fun getPetList(): Flow<List<Pet>>

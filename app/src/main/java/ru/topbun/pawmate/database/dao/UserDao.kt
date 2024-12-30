@@ -10,9 +10,12 @@ import ru.topbun.pawmate.entity.User
 interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addUser(user: User): User
+    suspend fun addUser(user: User)
 
     @Query("SELECT * FROM user WHERE email = :email AND password = :password LIMIT 1")
     suspend fun getUser(email: String, password: String): User?
+
+    @Query("SELECT COUNT(*) FROM user WHERE email = :email LIMIT 1")
+    suspend fun userIsExists(email: String): Int
 
 }
