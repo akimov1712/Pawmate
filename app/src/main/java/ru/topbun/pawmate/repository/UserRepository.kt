@@ -25,10 +25,19 @@ class UserRepository(private val context: Context) {
         return settings.getUserId() == user.id
     }
 
+    suspend fun getUserInfo(): User?{
+        val userId = settings.getUserId() ?: return null
+        return dao.getUser(userId)
+    }
+
     suspend fun login(email: String, password: String): Boolean{
         val user = dao.getUser(email, password) ?: return false
         settings.saveUserId(user.id)
         return settings.getUserId() == user.id
+    }
+
+    suspend fun logout(){
+        settings.saveUserId(null)
     }
 
 }

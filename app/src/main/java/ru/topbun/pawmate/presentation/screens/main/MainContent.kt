@@ -34,7 +34,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ru.topbun.pawmate.R
+import ru.topbun.pawmate.presentation.screens.notify.NotifyScreen
+import ru.topbun.pawmate.presentation.screens.profile.ProfileScreen
 import ru.topbun.pawmate.presentation.theme.Colors
 import ru.topbun.pawmate.presentation.theme.Fonts
 import ru.topbun.pawmate.presentation.theme.Typography
@@ -58,9 +62,10 @@ object MainScreen: Screen {
             LaunchedEffect(Unit) {
                 viewModel.loadTip()
             }
+            val navigator = LocalNavigator.currentOrThrow
             Header(
-                onClickNotify = {},
-                onClickProfile = {}
+                onClickNotify = { navigator.push(NotifyScreen) },
+                onClickProfile = { navigator.push(ProfileScreen) }
             )
             Tip(state.tip){
                 viewModel.loadTip()

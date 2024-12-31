@@ -53,7 +53,6 @@ data class LoginScreen(
             val context = LocalContext.current
             val viewModel = rememberScreenModel { LoginViewModel(context) }
             val state by viewModel.state.collectAsState()
-            viewModel.checkAuth()
             LaunchedEffect(state.isAuth) {
                 if (state.isAuth) {
                     onAuth()
