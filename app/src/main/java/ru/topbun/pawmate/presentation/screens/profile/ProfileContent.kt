@@ -42,11 +42,13 @@ import ru.topbun.auth.fragments.signUp.SignUpState.SignUpScreenState.Loading
 import ru.topbun.pawmate.R
 import ru.topbun.pawmate.entity.Pet
 import ru.topbun.pawmate.presentation.screens.auth.AuthScreen
+import ru.topbun.pawmate.presentation.screens.detail.DetailScreen
 import ru.topbun.pawmate.presentation.theme.Colors
 import ru.topbun.pawmate.presentation.theme.Fonts
 import ru.topbun.pawmate.presentation.theme.Typography
 import ru.topbun.pawmate.presentation.theme.components.AppButton
 import ru.topbun.pawmate.presentation.theme.components.AppIcon
+import ru.topbun.pawmate.presentation.theme.components.noRippleClickable
 import ru.topbun.pawmate.utils.formatAge
 
 object ProfileScreen: Screen {
@@ -66,7 +68,7 @@ object ProfileScreen: Screen {
             Header{ viewModel.logOut() }
             Spacer(modifier = Modifier.height(4.dp))
             NameWithCount(state)
-            PetList(state)
+            PetList(state){ navigator.push(DetailScreen(it)) }
             if (state.pets.size < 5){
                 AppButton(
                     modifier = Modifier
@@ -93,7 +95,7 @@ object ProfileScreen: Screen {
 
 
 @Composable
-private fun ColumnScope.PetList(state: ProfileState) {
+private fun ColumnScope.PetList(state: ProfileState, onClickPet: (Pet) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -101,15 +103,15 @@ private fun ColumnScope.PetList(state: ProfileState) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item { Spacer(modifier = Modifier.width(8.dp)) }
-        items(items = state.pets, key = {it.id}){ PetItem(it) }
+        items(items = state.pets, key = {it.id}){ PetItem(it, onClickPet) }
         item { Spacer(modifier = Modifier.width(8.dp)) }
     }
 }
 
 @Composable
-private fun PetItem(pet: Pet) {
+private fun PetItem(pet: Pet, onClickPet: (Pet) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().noRippleClickable { onClickPet(pet) },
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ){
         val bitmap = BitmapFactory.decodeFile(pet.image)
