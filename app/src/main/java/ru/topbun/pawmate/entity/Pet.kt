@@ -1,8 +1,11 @@
 package ru.topbun.pawmate.entity
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 @Entity(tableName = "pets")
 data class Pet(
     @PrimaryKey(autoGenerate = true)
@@ -12,4 +15,4 @@ data class Pet(
     val breed: String?,
     val image: String?,
     val type: PetType
-)
+): Parcelable

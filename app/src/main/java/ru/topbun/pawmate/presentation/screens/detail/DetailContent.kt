@@ -1,6 +1,7 @@
 package ru.topbun.pawmate.presentation.screens.detail
 
 import android.graphics.BitmapFactory
+import android.os.Parcelable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -21,9 +22,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,26 +34,31 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontVariation.width
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import ru.topbun.pawmate.R
 import ru.topbun.pawmate.entity.Pet
-import ru.topbun.pawmate.entity.PetType
 import ru.topbun.pawmate.entity.Tip
 import ru.topbun.pawmate.presentation.theme.Colors
 import ru.topbun.pawmate.presentation.theme.Fonts
 import ru.topbun.pawmate.presentation.theme.Typography
 import ru.topbun.pawmate.presentation.theme.components.AppIcon
-import ru.topbun.pawmate.repository.TipRepository
+import ru.topbun.pawmate.presentation.theme.components.noRippleClickable
+import ru.topbun.pawmate.presentation.theme.components.rippleClickable
+import ru.topbun.pawmate.utils.formatAge
+import ru.topbun.pawmate.utils.pickImageLauncher
 
+@Parcelize
 data class DetailScreen(
     val pet: Pet
-): Screen {
+): Screen, Parcelable {
 
     @Composable
     override fun Content() {
@@ -65,23 +70,20 @@ data class DetailScreen(
         ) {
             val context = LocalContext.current
             val navigator = LocalNavigator.currentOrThrow
-            var tips by remember {
-                mutableStateOf<List<Tip>>(emptyList())
-            }
-            val repository = TipRepository(context)
-            LaunchedEffect(Unit) {
-                tips = repository.getTipList(PetType.DOG)
-            }
+            val viewModel = rememberScreenModel { DetailViewModel(context, pet) }
+            val state by viewModel.state.collectAsState()
             Header(
-                onClickEdit = {},
-                onClickDelete = {},
+                state.editMode,
+                onClickEdit = viewModel::changeEditMode,
+                onClickDelete = { viewModel.deletePet() },
             )
             Spacer(modifier = Modifier.height(20.dp))
-            Image(pet.image)
+            Image(state.pet.image, state.editMode){ viewModel.changeImage(it) }
             Spacer(modifier = Modifier.height(20.dp))
-            Fields()
+            Fields(viewModel)
             Spacer(modifier = Modifier.height(20.dp))
-            Tips(tips)
+            Tips(state.tips)
+            if (state.shouldCloseScreen){ navigator.pop() }
         }
     }
 
@@ -126,40 +128,56 @@ private fun Tips(tips: List<Tip>) {
 }
 
 @Composable
-private fun Fields() {
+private fun Fields(viewModel: DetailViewModel) {
+    val state by viewModel.state.collectAsState()
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         TitleWithTextField(
             title = "Кличка:",
-            value = "Константин",
-            enabled = true,
+            value = state.pet.name,
+            enabled = state.editMode,
             keyboardType = KeyboardType.Text,
-            onChangeValue = {}
+            onChangeValue = viewModel::changeName
         )
         TitleWithTextField(
             title = "Возраст:",
-            value = "2 года",
-            enabled = true,
+            value = if(state.editMode) state.pet.age.toString() else state.pet.age.formatAge(),
+            enabled = state.editMode,
             keyboardType = KeyboardType.Number,
-            onChangeValue = {}
+            onChangeValue = viewModel::changeAge
         )
 
         TitleWithTextField(
             title = "Порода:",
-            value = "Корги",
-            enabled = true,
+            value = state.pet.breed ?: "Неизвестно",
+            enabled = state.editMode,
             keyboardType = KeyboardType.Text,
-            onChangeValue = {}
+            onChangeValue = viewModel::changeBreed
         )
-        TitleWithTextField(
-            title = "Тип:",
-            value = "Собака",
-            enabled = true,
-            keyboardType = KeyboardType.Text,
-            onChangeValue = {}
-        )
+        var isOpenChoicePetTypeModal by remember{ mutableStateOf(false) }
+        Box(
+            modifier = Modifier.noRippleClickable { isOpenChoicePetTypeModal = true }
+        ){
+            TitleWithTextField(
+                title = "Тип:",
+                value = state.pet.type.toString(),
+                enabled = false,
+                keyboardType = KeyboardType.Text,
+                onChangeValue = {}
+            )
+        }
+        if (isOpenChoicePetTypeModal){
+            ChoicePetTypeModal(
+                petType = state.pet.type,
+                onDismissDialog = { isOpenChoicePetTypeModal = false },
+                onChangePetType = {
+                    isOpenChoicePetTypeModal = false
+                    viewModel.changeType(it)
+                }
+            )
+        }
     }
 }
 
@@ -199,12 +217,16 @@ private fun TitleWithTextField(
 }
 
 @Composable
-private fun Image(image: String?) {
+private fun Image(image: String?,editMode: Boolean, onChangeImage: (String) -> Unit) {
+    val context = LocalContext.current
+    val launcher = pickImageLauncher(context, onChangeImage)
+    val modifier = if (editMode) Modifier.rippleClickable { launcher.launch("image/*")} else Modifier
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f)
             .border(1.5.dp, Colors.BLUE_GRAY, RoundedCornerShape(16.dp))
+            .then(modifier)
     ) {
         val bitmap = BitmapFactory.decodeFile(image)
         bitmap?.let {
@@ -221,7 +243,7 @@ private fun Image(image: String?) {
 }
 
 @Composable
-private fun Header(onClickEdit: () -> Unit, onClickDelete: () -> Unit) {
+private fun Header(modeEdit: Boolean, onClickEdit: () -> Unit, onClickDelete: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -233,7 +255,10 @@ private fun Header(onClickEdit: () -> Unit, onClickDelete: () -> Unit) {
             navigator.pop()
         }
         Spacer(modifier = Modifier.weight(1f))
-        AppIcon(R.drawable.ic_edit) {
+        AppIcon(
+            if (modeEdit) R.drawable.ic_accept
+            else R.drawable.ic_edit
+        ) {
             onClickEdit()
         }
         AppIcon(R.drawable.ic_delete) {

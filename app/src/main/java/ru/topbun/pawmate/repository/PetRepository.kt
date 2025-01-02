@@ -11,7 +11,9 @@ class PetRepository(
     private val dao = AppDatabase.getInstance(context).petDao()
 
     fun getPetList() = dao.getPetList()
-    fun getPet(id: Int) = dao.getPet(id)
+
+    suspend fun deletePet(id: Int) = dao.deletePet(id)
+
     suspend fun addPep(pet: Pet) = dao.insertPet(pet)
 
 

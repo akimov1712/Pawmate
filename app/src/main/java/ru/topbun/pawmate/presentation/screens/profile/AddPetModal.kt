@@ -51,6 +51,7 @@ import ru.topbun.pawmate.presentation.theme.components.AppButton
 import ru.topbun.pawmate.presentation.theme.components.AppTextField
 import ru.topbun.pawmate.presentation.theme.components.DialogWrapper
 import ru.topbun.pawmate.presentation.theme.components.rippleClickable
+import ru.topbun.pawmate.utils.pickImageLauncher
 import ru.topbun.pawmate.utils.saveImageToLocalStorage
 
 @Composable
@@ -190,14 +191,7 @@ private fun FieldWithPhoto(
         }
         val bitmap = BitmapFactory.decodeFile(image)
         val context = LocalContext.current
-        val launcher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetContent()
-        ) { uri ->
-            uri?.let {
-                val filePath = saveImageToLocalStorage(context, it)
-                filePath?.let { path -> onChangeImage(path) }
-            }
-        }
+        val launcher = pickImageLauncher(context, onChangeImage)
         Box(
             modifier = Modifier
                 .height(with(LocalDensity.current) { columnHeight.toDp() })
