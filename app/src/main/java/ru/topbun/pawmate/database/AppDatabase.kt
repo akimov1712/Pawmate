@@ -8,6 +8,7 @@ import ru.topbun.pawmate.database.dao.PetDao
 import ru.topbun.pawmate.database.dao.TipDao
 import ru.topbun.pawmate.database.dao.UserDao
 import ru.topbun.pawmate.entity.Pet
+import ru.topbun.pawmate.entity.Reminder
 import ru.topbun.pawmate.entity.Tip
 import ru.topbun.pawmate.entity.User
 
@@ -16,6 +17,7 @@ import ru.topbun.pawmate.entity.User
         User::class,
         Tip::class,
         Pet::class,
+        Reminder::class,
     ],
     exportSchema = false,
     version = 1
@@ -25,6 +27,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun tipDao(): TipDao
     abstract fun petDao(): PetDao
+    abstract fun reminderDao(): PetDao
 
     companion object {
 
