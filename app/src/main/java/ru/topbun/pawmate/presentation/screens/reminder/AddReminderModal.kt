@@ -65,6 +65,52 @@ import java.util.Locale
 import java.util.TimeZone
 
 @Composable
+fun EditReminderDialog(reminder: Reminder, onSave: (Reminder) -> Unit, onDismiss: () -> Unit) {
+    DialogWrapper(onDismissDialog = onDismiss) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            var title by remember { mutableStateOf(reminder.title) }
+            var descr by remember { mutableStateOf(reminder.description) }
+            var frequency by remember { mutableStateOf(reminder.frequency.toString()) }
+            var dateTime by remember { mutableStateOf(reminder.dateTime) }
+            Title()
+            Spacer(modifier = Modifier.height(16.dp))
+            Field(
+                title = title,
+                onChangeTitle = {title = it},
+                descr = descr,
+                onChangeDescr = {descr = it},
+                frequency = frequency,
+                onChangeFrequency = {frequency = it},
+                dateTime = formatDate(dateTime),
+                onChangeDateTime = {dateTime = it},
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            AppButton(
+                modifier = Modifier
+                    .height(48.dp)
+                    .fillMaxWidth(),
+                text = "Добавить",
+                enabled = true,
+            ) {
+                val newReminder = Reminder(
+                    id = reminder.id,
+                    title = title,
+                    description = descr,
+                    dateTime = dateTime,
+                    frequency = frequency.toLongOrNull() ?: 0,
+                    isActive = reminder.isActive
+                )
+                onSave(newReminder)
+            }
+        }
+    }
+}
+
+
+@Composable
 fun AddReminderDialog(onSave: (Reminder) -> Unit, onDismiss: () -> Unit) {
     DialogWrapper(onDismissDialog = onDismiss) {
         Column(

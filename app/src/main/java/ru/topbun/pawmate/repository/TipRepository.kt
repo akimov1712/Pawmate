@@ -15,6 +15,10 @@ class TipRepository(
 ) {
     private val dao = AppDatabase.getInstance(context).tipDao()
 
+    init {
+        initTips()
+    }
+
     suspend fun getRandomTip() = dao.getTips().random()
     suspend fun getTipList(type: PetType) = dao.getTips(type)
 
@@ -27,8 +31,5 @@ class TipRepository(
         }
     }
 
-    init {
-        initTips()
-    }
 
 }

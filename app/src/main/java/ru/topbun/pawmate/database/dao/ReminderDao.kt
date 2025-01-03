@@ -10,8 +10,15 @@ import ru.topbun.pawmate.entity.Reminder
 
 @Dao
 interface ReminderDao {
+
     @Query("SELECT * FROM reminders")
-    fun getAllReminders(): Flow<List<Reminder>>
+    fun getAllRemindersFlow(): Flow<List<Reminder>>
+
+    @Query("SELECT * FROM reminders WHERE id = :id LIMIT 1")
+    suspend fun getReminder(id: Int): Reminder
+
+    @Query("SELECT * FROM reminders")
+    suspend fun getAllReminders(): List<Reminder>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReminder(reminder: Reminder)

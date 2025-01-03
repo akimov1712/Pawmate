@@ -1,6 +1,6 @@
 package ru.topbun.pawmate.presentation.screens.reminder
 
-import android.text.format.DateFormat
+import android.widget.Space
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,18 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -58,7 +50,7 @@ import ru.topbun.pawmate.presentation.theme.components.AppIcon
 import ru.topbun.pawmate.presentation.theme.components.noRippleClickable
 import ru.topbun.pawmate.utils.formatDate
 
-object ReminderScreen: Screen {
+object ReminderScreen : Screen {
 
     @Composable
     override fun Content() {
@@ -68,7 +60,7 @@ object ReminderScreen: Screen {
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            var openAddReminderModal by remember{ mutableStateOf(false) }
+            var openAddReminderModal by remember { mutableStateOf(false) }
             val context = LocalContext.current
             val viewModel = rememberScreenModel { ReminderViewModel(context) }
             val state by viewModel.state.collectAsState()
@@ -84,7 +76,7 @@ object ReminderScreen: Screen {
             ) {
                 openAddReminderModal = true
             }
-            if (openAddReminderModal){
+            if (openAddReminderModal) {
                 AddReminderDialog(
                     onDismiss = { openAddReminderModal = false },
                     onSave = { openAddReminderModal = false; viewModel.addReminder(it) }
@@ -107,29 +99,47 @@ private fun ColumnScope.ReminderList(viewModel: ReminderViewModel) {
     ) {
         itemsIndexed(state.reminderList) { index, item ->
             ReminderItem(
+                viewModel = viewModel,
                 reminder = item,
                 isOpen = indexOpenDetailReminder == index,
-                onClick = { indexOpenDetailReminder = if (indexOpenDetailReminder == index) null else index }
-            ){
-                viewModel.updateReminderStatus(item.id, !item.isActive)
-            }
+                onClick = {
+                    indexOpenDetailReminder = if (indexOpenDetailReminder == index) null else index
+                }
+            )
         }
     }
 }
 
 @Composable
-private fun ReminderItem(reminder: Reminder, isOpen: Boolean, onClick: () -> Unit, onChangeStatus: () -> Unit) {
+private fun ReminderItem(
+    viewModel: ReminderViewModel,
+    reminder: Reminder,
+    isOpen: Boolean,
+    onClick: () -> Unit,
+) {
+    var isOpenEditReminder by rememberSaveable { mutableStateOf(false) }
+    if (isOpenEditReminder){
+        EditReminderDialog(
+            reminder = reminder,
+            onSave = {
+                isOpenEditReminder = false
+                viewModel.addReminder(it)
+            }
+        ) {
+            isOpenEditReminder = false
+        }
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Colors.WHITE)
-            .border(1.5.dp, Colors.BROWN, RoundedCornerShape(20.dp))
+            .border(1.5.dp, Colors.BROWN, RoundedCornerShape(12.dp))
             .noRippleClickable {
                 onClick()
             }
             .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ){
+    ) {
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -152,13 +162,15 @@ private fun ReminderItem(reminder: Reminder, isOpen: Boolean, onClick: () -> Uni
                 maxLines = if (isOpen) Int.MAX_VALUE else 2,
                 overflow = TextOverflow.Ellipsis
             )
-            if (isOpen){
+            if (isOpen) {
                 Text(
                     text = buildAnnotatedString {
                         append("Напоминание в: ")
-                        withStyle(SpanStyle(
-                            color = Colors.BROWN,
-                        )){
+                        withStyle(
+                            SpanStyle(
+                                color = Colors.BROWN,
+                            )
+                        ) {
                             append(formatDate(reminder.dateTime))
                         }
                     },
@@ -168,41 +180,56 @@ private fun ReminderItem(reminder: Reminder, isOpen: Boolean, onClick: () -> Uni
                     fontFamily = Fonts.SF.SEMI_BOLD
                 )
             }
-
         }
-        Switch(
-            checked = reminder.isActive,
-            onCheckedChange = {onChangeStatus()},
-            modifier = Modifier.padding(10.dp),
-            colors = SwitchDefaults.colors(
-                checkedTrackColor = Colors.BROWN,
-                uncheckedThumbColor = Colors.BROWN,
-                uncheckedTrackColor = Colors.WHITE,
-                uncheckedBorderColor = Colors.BROWN
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Switch(
+                checked = reminder.isActive,
+                onCheckedChange = { viewModel.updateReminderStatus(reminder.id, !reminder.isActive) },
+                modifier = Modifier.padding(10.dp),
+                colors = SwitchDefaults.colors(
+                    checkedTrackColor = Colors.BROWN,
+                    uncheckedThumbColor = Colors.BROWN,
+                    uncheckedTrackColor = Colors.WHITE,
+                    uncheckedBorderColor = Colors.BROWN
+                )
             )
-        )
-    }
-}
-
-
-@Composable
-private fun Header() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        val navigator = LocalNavigator.currentOrThrow
-        AppIcon(R.drawable.ic_back) {
-            navigator.pop()
+            if (isOpen) {
+                Row{
+                    AppIcon(R.drawable.ic_edit) {
+                        isOpenEditReminder = true
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    AppIcon(R.drawable.ic_delete) {
+                        viewModel.deleteReminder(reminder)
+                    }
+                }
+            }
         }
-        Text(
-            text = "Напоминание",
-            style = Typography.APP_TEXT,
-            color = Colors.BLACK,
-            fontSize = 24.sp,
-            fontFamily = Fonts.SF.BOLD
-        )
     }
 }
+
+
+    @Composable
+    private fun Header() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            val navigator = LocalNavigator.currentOrThrow
+            AppIcon(R.drawable.ic_back) {
+                navigator.pop()
+            }
+            Text(
+                text = "Напоминание",
+                style = Typography.APP_TEXT,
+                color = Colors.BLACK,
+                fontSize = 24.sp,
+                fontFamily = Fonts.SF.BOLD
+            )
+        }
+    }
