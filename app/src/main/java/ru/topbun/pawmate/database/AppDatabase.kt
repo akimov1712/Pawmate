@@ -25,7 +25,7 @@ import ru.topbun.pawmate.entity.User
         Reminder::class,
     ],
     exportSchema = true,
-    version = 2,
+    version = 3,
 )
 abstract class AppDatabase : RoomDatabase() {
 

@@ -132,7 +132,7 @@ private fun Field(
             placeholder = "Заголовок",
         )
         AppTextField(
-            modifier = Modifier.height(120.dp),
+            modifier = Modifier.height(48.dp),
             value = descr,
             errorText = null,
             onValueChange = { onChangeDescr(it) },

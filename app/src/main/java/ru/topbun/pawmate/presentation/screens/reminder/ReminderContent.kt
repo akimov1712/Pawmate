@@ -106,15 +106,19 @@ private fun ColumnScope.ReminderList(viewModel: ReminderViewModel) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         itemsIndexed(state.reminderList) { index, item ->
-            ReminderItem(item, indexOpenDetailReminder == index){
-                indexOpenDetailReminder = if (indexOpenDetailReminder == index) null else index
+            ReminderItem(
+                reminder = item,
+                isOpen = indexOpenDetailReminder == index,
+                onClick = { indexOpenDetailReminder = if (indexOpenDetailReminder == index) null else index }
+            ){
+                viewModel.updateReminderStatus(item.id, !item.isActive)
             }
         }
     }
 }
 
 @Composable
-private fun ReminderItem(reminder: Reminder, isOpen: Boolean, onClick: () -> Unit) {
+private fun ReminderItem(reminder: Reminder, isOpen: Boolean, onClick: () -> Unit, onChangeStatus: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -160,7 +164,7 @@ private fun ReminderItem(reminder: Reminder, isOpen: Boolean, onClick: () -> Uni
                     },
                     style = Typography.APP_TEXT,
                     color = Colors.BLACK,
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     fontFamily = Fonts.SF.SEMI_BOLD
                 )
             }
@@ -168,7 +172,7 @@ private fun ReminderItem(reminder: Reminder, isOpen: Boolean, onClick: () -> Uni
         }
         Switch(
             checked = reminder.isActive,
-            onCheckedChange = {  },
+            onCheckedChange = {onChangeStatus()},
             modifier = Modifier.padding(10.dp),
             colors = SwitchDefaults.colors(
                 checkedTrackColor = Colors.BROWN,

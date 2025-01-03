@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
         val launcher = rememberLauncherForActivityResult(contract = contract) {
         }
         SideEffect {
-            launcher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.SET_ALARM) )
+            launcher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.USE_EXACT_ALARM) )
         }
     }
 
