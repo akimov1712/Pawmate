@@ -43,6 +43,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -63,6 +65,8 @@ android {
 dependencies {
 
     implementation("androidx.work:work-runtime-ktx:2.10.0")
+    implementation("com.github.commandiron:WheelPickerCompose:1.1.11")
+    coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:1.1.6")
     implementation(libs.coil.compose)
 
     // JsonSerialization

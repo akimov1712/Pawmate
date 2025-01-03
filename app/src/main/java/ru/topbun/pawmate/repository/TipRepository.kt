@@ -18,4 +18,17 @@ class TipRepository(
     suspend fun getRandomTip() = dao.getTips().random()
     suspend fun getTipList(type: PetType) = dao.getTips(type)
 
+    private fun initTips() = CoroutineScope(Dispatchers.IO).launch {
+        if (dao.getTips().size < 50){
+            dao.deleteAll()
+            val jsonString = context.assets.open("tips.json").bufferedReader().use { it.readText() }
+            val tipsList = Json.decodeFromString<List<Tip>>(jsonString)
+            dao.insertTips(tipsList)
+        }
+    }
+
+    init {
+        initTips()
+    }
+
 }

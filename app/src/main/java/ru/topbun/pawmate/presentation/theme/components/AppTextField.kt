@@ -61,7 +61,7 @@ fun AppTextField(
                 modifier = modifier
                     .weight(1f)
                     .padding(padding),
-                contentAlignment = Alignment.CenterStart
+                contentAlignment = Alignment.TopStart
             ){
                 if (value.isEmpty()){
                     Text(

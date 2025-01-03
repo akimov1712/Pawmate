@@ -25,10 +25,7 @@ import ru.topbun.pawmate.entity.User
         Reminder::class,
     ],
     exportSchema = true,
-    version = 3,
-    autoMigrations = [
-        AutoMigration(2,3)
-    ]
+    version = 2,
 )
 abstract class AppDatabase : RoomDatabase() {
 
@@ -39,22 +36,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
 
-        val MIGRATION_1_2 = object : Migration(1, 2) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("""
-            CREATE TABLE IF NOT EXISTS `reminders` (
-                `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                `dateTime` INTEGER NOT NULL,
-                `description` TEXT NOT NULL,
-                `frequency` TEXT NOT NULL,
-                `isActive` INTEGER NOT NULL,
-                `title` TEXT NOT NULL
-            )
-        """.trimIndent())
-            }
-        }
-
-        private const val DB_NAME = "pawmate.db"
+        private const val DB_NAME = "database.db"
         private var INSTANCE: AppDatabase? = null
 
         fun getInstance(context: Context) = INSTANCE ?: synchronized(Unit) {
@@ -63,7 +45,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         private fun createDatabase(context: Context) = Room.databaseBuilder(
             context, AppDatabase::class.java, DB_NAME
-        ).createFromAsset("tips.db").addMigrations(MIGRATION_1_2).build()
+        ).fallbackToDestructiveMigration(false).createFromAsset("tips.db").build()
 
     }
 

@@ -16,9 +16,9 @@ class ReminderViewModel(
     private val repository = ReminderRepository(context)
 
     private fun loadReminders() = screenModelScope.launch {
-//        repository.getReminderList().collect{
-//            updateState { copy(it) }
-//        }
+        repository.getReminderList().collect{
+            updateState { copy(it) }
+        }
     }
 
     fun addReminder(reminder: Reminder) {
@@ -31,6 +31,10 @@ class ReminderViewModel(
 
     fun updateReminderStatus(id: Int, isActive: Boolean) {
         screenModelScope.launch { repository.updateReminderState(id, isActive) }
+    }
+
+    init {
+        loadReminders()
     }
 
 }
