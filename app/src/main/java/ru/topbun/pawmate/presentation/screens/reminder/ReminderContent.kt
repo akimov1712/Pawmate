@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -32,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +55,7 @@ import ru.topbun.pawmate.presentation.theme.Fonts
 import ru.topbun.pawmate.presentation.theme.Typography
 import ru.topbun.pawmate.presentation.theme.components.AppButton
 import ru.topbun.pawmate.presentation.theme.components.AppIcon
+import ru.topbun.pawmate.presentation.theme.components.noRippleClickable
 import ru.topbun.pawmate.utils.formatDate
 
 object ReminderScreen: Screen {
@@ -95,23 +98,31 @@ object ReminderScreen: Screen {
 @Composable
 private fun ColumnScope.ReminderList(viewModel: ReminderViewModel) {
     val state by viewModel.state.collectAsState()
+    var indexOpenDetailReminder by rememberSaveable { mutableStateOf<Int?>(null) }
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .weight(1f),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        items(state.reminderList) { ReminderItem(it, false) }
+        itemsIndexed(state.reminderList) { index, item ->
+            ReminderItem(item, indexOpenDetailReminder == index){
+                indexOpenDetailReminder = if (indexOpenDetailReminder == index) null else index
+            }
+        }
     }
 }
 
 @Composable
-private fun ReminderItem(reminder: Reminder, isOpen: Boolean) {
+private fun ReminderItem(reminder: Reminder, isOpen: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Colors.WHITE)
             .border(1.5.dp, Colors.BROWN, RoundedCornerShape(20.dp))
+            .noRippleClickable {
+                onClick()
+            }
             .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ){
