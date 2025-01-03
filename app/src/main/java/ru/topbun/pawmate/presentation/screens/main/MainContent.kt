@@ -1,6 +1,5 @@
 package ru.topbun.pawmate.presentation.screens.main
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,10 +17,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,7 +26,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -37,15 +33,13 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ru.topbun.pawmate.R
-import ru.topbun.pawmate.presentation.screens.notify.NotifyScreen
 import ru.topbun.pawmate.presentation.screens.profile.ProfileScreen
+import ru.topbun.pawmate.presentation.screens.reminder.ReminderScreen
 import ru.topbun.pawmate.presentation.theme.Colors
 import ru.topbun.pawmate.presentation.theme.Fonts
 import ru.topbun.pawmate.presentation.theme.Typography
 import ru.topbun.pawmate.presentation.theme.components.AppIcon
-import ru.topbun.pawmate.presentation.theme.components.noRippleClickable
 import ru.topbun.pawmate.presentation.theme.components.rippleClickable
-import ru.topbun.pawmate.repository.TipRepository
 
 object MainScreen: Screen {
 
@@ -64,7 +58,7 @@ object MainScreen: Screen {
             }
             val navigator = LocalNavigator.currentOrThrow
             Header(
-                onClickNotify = { navigator.push(NotifyScreen) },
+                onClickNotify = { navigator.push(ReminderScreen) },
                 onClickProfile = { navigator.push(ProfileScreen) }
             )
             Tip(state.tip){

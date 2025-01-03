@@ -11,12 +11,12 @@ plugins {
 
 android {
     namespace = "ru.topbun.pawmate"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "ru.topbun.pawmate"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -62,7 +62,7 @@ android {
 
 dependencies {
 
-    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
     implementation(libs.coil.compose)
 
     // JsonSerialization
